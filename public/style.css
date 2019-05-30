@@ -27,9 +27,8 @@ h4{
     background-color: #77b300;
     color: #fff;
     text-decoration:none;
-    width: 100%;
+    width: 90%;
     margin-bottom: 0.25em; 
-    margin-left: -2em;
     font-size: 1em;
     line-height: 1.5em;
 }
@@ -118,7 +117,6 @@ ul{
     font-weight: bold;
     margin-top: -0em;
     margin-bottom: 2em;
-    margin-left: -2em;
     margin-right: 1%;
     display: inline-block;
     width:40%;

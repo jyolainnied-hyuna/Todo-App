@@ -6,15 +6,15 @@
         var title_input = document.getElementById('title');
         var desc_input = document.getElementById('description');
 
-        //check if todosArray exists in local storage
-        //if it doesn't exist in local storage then it is created
-        var todosArray = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')):[];
+        // //check if todosArray exists in local storage
+        // //if it doesn't exist in local storage then it is created
+        // var todosArray = localStorage.getItem('todos') ? JSON.parse(localStorage.getItem('todos')):[];
 
-        //set Local storage item
-        localStorage.setItem('todos', JSON.stringify(todosArray));
+        // //set Local storage item
+        // localStorage.setItem('todos', JSON.stringify(todosArray));
 
-        //get local storage item
-        var storage = JSON.parse(localStorage.getItem('todos'));
+        // //get local storage item
+        // var storage = JSON.parse(localStorage.getItem('todos'));
         
         //Event listener to form
         form.addEventListener('submit', function(event)
@@ -23,13 +23,13 @@
             event.preventDefault();           
             
             //create task object
-            var taskOject = createTaskObject(title_input, desc_input)
+            // var taskOject = createTaskObject(title_input, desc_input)
 
-            //push new task object to todoArray
-            todosArray.push(taskOject);
+            // //push new task object to todoArray
+            // todosArray.push(taskOject);
             
-            //update local storage item
-            localStorage.setItem('todos', JSON.stringify(todosArray));
+            // //update local storage item
+            // localStorage.setItem('todos', JSON.stringify(todosArray));
 
             //call to todoMaker function
             todoMaker(taskOject);
