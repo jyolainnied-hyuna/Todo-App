@@ -13,16 +13,22 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 })); 
 
 
-
-//check if todosArray exists in local storage
-//if it doesn't exist in local storage then it is created
 const todosArray = []
+
 
 //render page
 app.post('/', (req, res) =>
 {
     res.sendFile('index.html');
 });
+
+
+//response to show all task
+app.get('/show', (req, res) =>
+{
+    res.send(todosArray);
+});
+
 
 //response to add request
 app.post('/add', (req, res) =>
@@ -44,12 +50,33 @@ app.post('/add', (req, res) =>
     res.send(task);
 });
 
+//response to delete request
+app.post('/edit', (req, res) =>
+{  
+    //checks is task exists
+    const task = todosArray.find(t => t.ID === parseInt(req.body.ID));
+    if(!task) res.status(404).send("This task doesn't exist");
+    
+    //find index of task in aaray
+    const index = todosArray.indexOf(task);
+    
+    //send task item 
+    res.send(todosArray[index]);
+});
 
 //response to delete request
 app.delete('/delete', (req, res) =>
-{    
+{  
+    //checks is task exists
+    const task = todosArray.find(t => t.ID === parseInt(req.body.ID));
+    if(!task) res.status(404).send("This task doesn't exist");
+    
+    //find index of task in aaray
+    const index = todosArray.indexOf(task);
+    
     //remove all elements from todoArray
-    todosArray.splice(0,todosArray.length);
+    todosArray.splice(index,1);
+    
     res.send('Task has been deleted!');
 });
 
