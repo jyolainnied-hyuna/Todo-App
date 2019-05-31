@@ -9,7 +9,7 @@ var desc_input = document.getElementById('description');
 $( document ).ready(function() {
     $.ajax({
     type: 'get',
-    url: '/show',
+    url: 'api/showAll',
     dataType: 'text'
     })
     .done(function(data){
@@ -37,7 +37,7 @@ form.addEventListener('submit', function(e)
 
     $.ajax({
         type: 'post',
-        url: '/add',
+        url: '/api/add',
         data: taskOject,
         dataType: 'text'
     })
@@ -69,7 +69,7 @@ function editTask(value)
 {
     $.ajax({
         type: 'post',
-        url: '/edit',
+        url: '/api/edit',
         data: {ID: value},
         dataType: 'text'
     })
@@ -84,7 +84,7 @@ function deleteTask(value)
 {
     $.ajax({
         type: 'delete',
-        url: '/delete',
+        url: '/api/delete',
         data: {ID: value},
         dataType: 'text'
     })
@@ -97,7 +97,7 @@ clear_button.addEventListener('click', function(e)
 
     $.ajax({
         type: 'delete',
-        url: '/clear',
+        url: '/api/delete/all',
         data: 'clear all',
         dataType: 'text'
     })
