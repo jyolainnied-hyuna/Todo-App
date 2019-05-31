@@ -97,7 +97,7 @@ clear_button.addEventListener('click', function(e)
 
     $.ajax({
         type: 'delete',
-        url: '/api/delete/all',
+        url: '/api/deleteAll',
         data: 'clear all',
         dataType: 'text'
     })

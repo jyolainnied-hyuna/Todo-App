@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const express = require('express');
+const uniqid = require('uniqid');
 const router = express.Router();
 
 const todosArray = []
@@ -15,16 +16,16 @@ router.post('/add', (req, res) =>
     
     const result =Joi.validate(req.body, schema);
     
-    if(result.error) return res.status(400).send(result.error.details[0].message);
+    if(result.error) return res.status(400).send(result.error.details[0].message);          //Bad Request
     
     let date = new Date();
     
     let task = {
-        ID: todosArray.length + 1,
+        ID: uniqid(),
         Title: req.body.Title,
         Description: req.body.Description,
         Status: 'To Do',
-        DateCreated: date.getMonth()+1 + '/'+ date.getDate() + '/' + date.getFullYear() + ' -- ' + date.getHours() +':'+date.getMinutes(),
+        DateCreated: date.getMonth()+1 + '/'+ date.getDate() + '/' + date.getFullYear() + ' -- ' + date.getHours() +':'+String(date.getMinutes()).padStart(2, '0'),
         DateCompleted: 'No'  
     };
 
@@ -40,7 +41,7 @@ router.delete('/delete', (req, res) =>
 {  
     //checks is task exists
     const task = todosArray.find(t => t.ID === parseInt(req.body.ID));
-    if(!task) res.status(404).send("This task doesn't exist");   //404: Oject not found
+    if(!task) res.status(404).send("This task doesn't exist");   //404: Object not found
     
     //find index of task in aaray
     const index = todosArray.indexOf(task);
@@ -58,7 +59,7 @@ router.delete('/deleteAll', (req, res) =>
     //remove all elements from todoArray
     todosArray.splice(0,todosArray.length);
 
-    res.send('Task(s) has been deleted!');
+    res.send('Task(s) will be deleted!');
 });
 
 
@@ -66,8 +67,8 @@ router.delete('/deleteAll', (req, res) =>
 router.post('/edit', (req, res) =>
 {  
     //checks is task exists
-    const task = todosArray.find(t => t.ID === parseInt(req.body.ID));
-    if(!task) res.status(404).send("This task doesn't exist");      //404: Oject not found
+    const task = todosArray.find(t => t.ID === req.body.ID);
+    if(!task) res.status(404).send("This task doesn't exist");      //404: Object not found
     
     //find index of task in aaray
     const index = todosArray.indexOf(task);

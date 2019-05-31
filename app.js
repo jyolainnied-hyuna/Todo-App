@@ -1,4 +1,3 @@
-const Joi = require('joi');
 const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
@@ -17,9 +16,6 @@ app.use(bodyParser.json()); // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 })); 
-
-
-
 
 //server listening on port 3000
 app.listen(3000,  console.log('Listening on port 3000...'));
