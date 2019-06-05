@@ -14,7 +14,7 @@ router.post('/add', (req, res) =>
         Description: Joi.string().min(10).required()
     }
     
-    const result =Joi.validate(req.body, schema);
+    const result = Joi.validate(req.body, schema);
     
     if(result.error) return res.status(400).send(result.error.details[0].message);          //Bad Request
     

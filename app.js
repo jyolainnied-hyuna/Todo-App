@@ -13,9 +13,9 @@ app.use('/api', task);
 app.use('/', home);
 
 app.use(bodyParser.json()); // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-})); 
+
+ // to support URL-encoded bodies
+app.use(bodyParser.urlencoded({extended: true})); 
 
 //server listening on port 3000
-app.listen(3000,  console.log('Listening on port 3000...'));
+app.listen(3000,  console.log('Todo-App Listening on port 3000...'));
