@@ -55,5 +55,17 @@ async function getCourses(){
 
 }
 
-getCourses();
+
+//update document
+async function updateCourse(id){
+    const course = await Course.findById(id);
+    if(!course) return;
+    course.isPublished = true;
+    course.author = 'Another person';
+
+    const result = await course.save();
+    console.log(result);
+}
+
+updateCourse('5cf808c46f6b2f4aff6a1dea');
 
