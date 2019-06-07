@@ -94,10 +94,12 @@ router.delete('/delete/:id', async(req, res) =>
 
 
 //response to delete all tasks request
-router.delete('/deleteAll/:id', async(req, res) =>
+router.delete('/deleteAll', async(req, res) =>
 {
     //checks is task exists and deletes it
     const task = await Task.delete({});
+    if(!task) res.status(404).send("This task doesn't exist");   //404: Object not found
+
     res.send('Task(s) will be deleted!');
 });
 
