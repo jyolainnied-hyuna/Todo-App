@@ -1,9 +1,15 @@
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
-
 const task = require('./routes/task');
 const home = require('./routes/home');
+
+
+//connect to database, this is a promise
+mongoose.connect('mongodb://localhost/TaskDB')                 
+    .then(() => console.log('Connect to TaskDB..'))
+    .catch(err => console.group('Could not connect to TaskDB...',err))
 
 app.use(express.json());
 app.use(express.static('public'));
