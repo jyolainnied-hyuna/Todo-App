@@ -7,7 +7,7 @@ const home = require('./routes/home');
 
 
 //connect to database, this is a promise
-mongoose.connect('mongodb://localhost/TaskDB')                 
+mongoose.connect('mongodb://localhost/TaskDB', { useFindAndModify: false })                 
     .then(() => console.log('Connect to TaskDB..'))
     .catch(err => console.group('Could not connect to TaskDB...',err))
 

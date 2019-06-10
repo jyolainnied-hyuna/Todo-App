@@ -26,8 +26,9 @@ const taskSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now
     },
-    DateComplete: {
-        type: Date
+    DateCompleted: {
+        type: Date,
+        default: Date.now
     }
 });
 
@@ -61,33 +62,42 @@ router.post('/add', async(req, res) =>
 });
 
 
+//response to get task request
+router.get('/getTask/:ID', async(req, res) =>
+{  
+    //checks if task exists and updates it
+    const task = await Task.findById(req.params.ID);
+    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
+    //send task item 
+    res.send(task);
+});
+
+
 //response to edit request
-router.put('/edit/:id', async(req, res) =>
+router.put('/edit/:ID', async(req, res) =>
 {  
     //validating input
-    const result = validateTask (req.body);  
+    const result = validateTask(req.body);  
     if(result.error) return res.status(400).send(result.error.details[0].message);          //Bad Request
 
     //checks if task exists and updates it
     const task = await Task.findByIdAndUpdate(req.params.ID,
-        { 
-        Title: req.body.Title,
-        Description: req.body.Description,
-        Status: req.body.Status,
-        DateComplete: req.body.DateComplete
-    }, {new: true});
-    if(!task) res.status(404).send("This task doesn't exist");   //404: Object not found
+        {   Title: req.body.Title,
+            Description: req.body.Description
+        }, {new: true});
+    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
 
     //send task item 
     res.send(task);
 });
 
 //response to delete a task request
-router.delete('/delete/:id', async(req, res) =>
+router.delete('/delete/:ID', async(req, res) =>
 {  
+    console.log('here');
     //checks is task exists and deletes it
-    const task = await Task.findByIdAndRemove(req.params.ID);
-    if(!task) res.status(404).send("This task doesn't exist");   //404: Object not found
+    const task = await Task.findByIdAndDelete(req.params.ID);
+    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
     
     res.send(task);
 });
@@ -97,8 +107,8 @@ router.delete('/delete/:id', async(req, res) =>
 router.delete('/deleteAll', async(req, res) =>
 {
     //checks is task exists and deletes it
-    const task = await Task.delete({});
-    if(!task) res.status(404).send("This task doesn't exist");   //404: Object not found
+    const task = await Task.deleteMany({ Status: 'To Do' }, { Status: 'Completed' });
+    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
 
     res.send('Task(s) will be deleted!');
 });
@@ -110,7 +120,6 @@ function validateTask (body){
     Title: Joi.string().min(5).max(50).required(),       
     Description: Joi.string().min(10).max(225).required()
     }
-
     return Joi.validate(body, schema);
 }
 

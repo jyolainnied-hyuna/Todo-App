@@ -49,17 +49,19 @@ form.addEventListener('submit', function(e)
 
 ///Listen for edit and delete events
 todoList.addEventListener('click', function(event)
-{
+{    
     if(event.target.className == "delete")
     {
         deleteTask(event.target.value);
-        location.reload();                  //reload page so that updated list of tasks can be shown
+        document.location.reload();  
     }
 
     if(event.target.className == "edit")
     {
-        editTask(event.target.value);
-        //location.reload();                  //reload page so that updated list of tasks can be shown
+        getTask(event.target.value);
+
+//        editTask(event.target.value);
+//        document.location.reload(); 
     }
    
 });
@@ -67,10 +69,17 @@ todoList.addEventListener('click', function(event)
 //AJAX function to send delete task request
 function editTask(value)
 {
+     //create task object
+    var taskObject =
+    {
+        Title : "title_value.value",
+        Description: "description_value.value"
+    };
+    
     $.ajax({
-        type: 'post',
-        url: '/api/edit',
-        data: {ID: value},
+        type: 'put',
+        url: '/api/edit/'+ value,
+        data: taskObject,
         dataType: 'text'
     })
     .done(function(data){
@@ -81,12 +90,24 @@ function editTask(value)
 
 //AJAX function to send delete task request
 function deleteTask(value)
-{
+{   
     $.ajax({
         type: 'delete',
-        url: '/api/delete',
-        data: {ID: value},
+        url: '/api/delete/'+ value,
         dataType: 'text'
+    })
+};
+
+//AJAX function to send get a task request
+function getTask(value)
+{   
+    $.ajax({
+        type: 'get',
+        url: '/api/getTask/'+ value,
+        dataType: 'text'
+    })
+    .done(function(data){
+        makeEditForm(JSON.parse(data));
     })
 };
 
@@ -98,19 +119,15 @@ clear_button.addEventListener('click', function(e)
     $.ajax({
         type: 'delete',
         url: '/api/deleteAll',
-        data: 'clear all',
         dataType: 'text'
     })
     .done(function(data){
-        while(todoList.firstChild)
-        {
-            todoList.removeChild(todoList.firstChild);
-        }
-
         alert(data);
-
+        document.location.reload();
     });
 });
+
+
 
 //function to create task object
 var createTaskObject = function (title_value, description_value)
@@ -129,12 +146,12 @@ var addTaskDiv = function (value)
     //create div element and assign className
     var task_containner = document.createElement('div');
     task_containner.className = "task_containner";
-    task_containner.id = 'task_containner-'+ value.ID;
+    task_containner._id = 'task_containner-'+ value._id;
     
     //create div element and assign className
     var todo = document.createElement('div');
     todo.className = "task";
-    todo.id = 'task-'+ value.ID;
+    todo._id = 'task-'+ value._id;
 
     //Add info to task display
     todo.innerHTML = '<strong>Title</strong>: ' + value.Title + '<br> <strong>Description</strong>: ' + value.Description + '<br> <strong>Status</strong>: ' + value.Status + '<br> <strong>Date Created</strong>: ' + value.DateCreated + '<br> <strong>Date Completed</strong>: ' + value.DateCompleted; 
@@ -157,7 +174,7 @@ var addEditButton = function(value,task_containner)
     
     edit_task.textContent = "Edit";
     edit_task.className = "edit";
-    edit_task.value = value["ID"]; //in order to unquiely identify item
+    edit_task.value = value["_id"]; //in order to unquiely identify item
     task_containner.appendChild(edit_task);
 
 };
@@ -169,6 +186,28 @@ var addDeleteButton = function(value, task_containner)
     
     delete_task.textContent = "Delete";
     delete_task.className = "delete";
-    delete_task.value = value["ID"];  //in order to unquiely identify item
+    delete_task.value = value["_id"];  //in order to unquiely identify item
     task_containner.appendChild(delete_task);
 };
+
+var makeEditForm =function(values){
+   let edit_form = document.createElement('form'); 
+    edit_form.id = "edit_form";
+    edit_form.innerHTML =  `<h4> Edit Task</h4>
+    <small>Title should not be less than 5 letters.</small>
+    <input type="text" id="title" value=${values.Title} required><br><br>
+    <small>Description should not be less than 10 characters.</small><br>
+    <textarea type="text" id='description' required>${values.Description}</textarea><br>
+    <p>Status</p>
+    <input type="radio" name="status" value="To Do" checked>To Do<br>
+    <input type="radio" name="Status" value="Completed">Completed<br>
+    <p>Date Created: ${values.DateCreated}</p>
+    <p>Date Completed: ${values.DateCompleted}</p><br>
+    <input type="submit" id="edit_button" value="Edit"><br>` ;
+        
+    let form = document.getElementById('form');
+    let task_form = document.getElementById('form_task');
+    
+    form.replaceChild(edit_form, form_task);    
+
+}
