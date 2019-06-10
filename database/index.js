@@ -9,11 +9,36 @@ mongoose.connect('mongodb://localhost/playground')
 
 //create document/ table structure in the database
 const courseSchema = new mongoose.Schema({
-    name: String,
+    name: {
+        type: String, 
+        required: true,
+        minlength: 5,
+        maxlength:255
+    },
+    category:{
+        type: String,
+        enum: ['web', 'mobile', 'network'],
+        required: true
+    },
     author: String,
-    tags: [String],
+    tags: {
+        type: Array,
+        validate:{
+            isAsync: true,
+            validator: function(v, callback) {
+                return v && v.length > 0;
+            },
+            message: 'A course should have at least one tag'
+        }
+    },
     date: {type: Date, default: Date.now},
-    isPublished: Boolean
+    isPublished: Boolean,
+    price:{
+        type: Number, 
+        required:function(){return this.isPublished;} ,
+        min: 10,
+        max: 200
+    }
 });
 
 
@@ -29,16 +54,21 @@ async function createCourse()
     const course = new Course(
         {
             name: 'Vue..',
-            author: 'Jyolainnie',
-            tags: ['vue', 'frontend'],
-            isPublished: true
-        }
-    )
+            author: 'joli',
+            tags: ['frontend'],
+            category: 'web',
+            isPublished: true,
+            price:10
+        });
 
-    //async operation
-    const result = await course.save();
-    console.log(result);
-
+    try{
+         //async operation
+        const result = await course.save();
+        console.log(result);
+    }
+    catch (ex){
+        console.log(ex.message);
+    }
 }
 
 
@@ -55,5 +85,22 @@ async function getCourses(){
 
 }
 
-getCourses();
+
+//update document
+    // const result = await course.save();
+    // console.log(result);
+
+
+//remove document
+async function removeCourse(id){
+    //const result = await Course.deleteOne({_id:id});
+
+    const course = await Course.findByIdAndRemove(id);
+
+    console.log(course);
+}
+
+//removeCourse('5cf808c46f6b2f4aff6a1dea');
+
+createCourse();
 
