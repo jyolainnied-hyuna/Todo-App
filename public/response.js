@@ -1,9 +1,14 @@
+window.onerror = function(message, source, lineno, colno, error) { 
+    alert(error);
+ }
+
+
 //Declaring variables
-var form = document.querySelector('form');
-var todoList = document.getElementById('todoList');
-var clear_button = document.getElementById('clear');
-var title_input = document.getElementById('title');
-var desc_input = document.getElementById('description');
+let formDiv = document.getElementById('form');
+let add_form = document.getElementById('form_task');    
+let todoList = document.getElementById('todoList');
+let clear_button = document.getElementById('clear');
+
 
 //show all task on page load
 $( document ).ready(function() {
@@ -17,23 +22,29 @@ $( document ).ready(function() {
 
     for(i =0; i < task_details.length; i++)
     {
-        addTaskDiv(task_details[i]);   
+        createTaskDiv(task_details[i]);   
     }
         
     });
 });
 
-//AJAX to add task
-form.addEventListener('submit', function(e)
+formDiv.addEventListener('submit', (event)=>
 {
-    e.preventDefault();  //prevents form submit from refreshing page
+    event.preventDefault();
 
+    (event.target.id == "form_task")? addTask() : editTask();
+});
+
+
+// //AJAX to add task
+function addTask()
+{
     //create task object
-    var taskOject = createTaskObject(title_input, desc_input);
+    let taskOject = createTaskObject();
 
     //reset input value
-    title_input.value = '';
-    desc_input.value = '';
+    document.getElementById('title').value = '';
+    desc_input = document.getElementById('description').value = '';
 
     $.ajax({
         type: 'post',
@@ -42,15 +53,55 @@ form.addEventListener('submit', function(e)
         dataType: 'text'
     })
     .done(function(data){
-        var task_details = JSON.parse(data);
-        addTaskDiv(task_details);
+        let task_details = JSON.parse(data);
+        createTaskDiv(task_details);
+    })
+    .fail(function(data){
+        console.log(JSON.parse(data.responseText));
     });
-});
+}
+
+// //AJAX to add task
+function editTask()
+{
+    let editForm = document.getElementById('edit_form');
+    
+    //create task object
+    let title_input = document.getElementById('title');
+    let desc_input = document.getElementById('description');
+
+    let status = $("input[name='status']:checked").val();
+    let t_date;
+    (status === 'Completed')? t_date = Date(): t_date = undefined;
+   
+    
+    let taskObject =
+    {
+        Title : title_input.value,
+        Description: desc_input.value,
+        Status: status,
+        DateCompleted: t_date
+    }
+
+    let id = editForm.getAttribute("name");
+   $.ajax({
+       type: 'put',
+       url: '/api/edit/'+ id,
+       data: taskObject,
+       dataType: 'text'
+   })
+   .done(function(data){ 
+       var task_details = JSON.parse(data);
+       document.location.reload(); 
+
+   });
+};
+
 
 ///Listen for edit and delete events
-todoList.addEventListener('click', function(event)
+todoList.addEventListener('click', ()=>
 {    
-    if(event.target.className == "delete")
+    if(event.target.className == "delete")  
     {
         deleteTask(event.target.value);
         document.location.reload();  
@@ -59,34 +110,9 @@ todoList.addEventListener('click', function(event)
     if(event.target.className == "edit")
     {
         getTask(event.target.value);
-
-//        editTask(event.target.value);
-//        document.location.reload(); 
     }
    
 });
-
-//AJAX function to send delete task request
-function editTask(value)
-{
-     //create task object
-    var taskObject =
-    {
-        Title : "title_value.value",
-        Description: "description_value.value"
-    };
-    
-    $.ajax({
-        type: 'put',
-        url: '/api/edit/'+ value,
-        data: taskObject,
-        dataType: 'text'
-    })
-    .done(function(data){
-        var task_details = JSON.parse(data);
-        console.log(task_details);
-    });
-};
 
 //AJAX function to send delete task request
 function deleteTask(value)
@@ -107,7 +133,7 @@ function getTask(value)
         dataType: 'text'
     })
     .done(function(data){
-        makeEditForm(JSON.parse(data));
+        createEditForm(JSON.parse(data));
     })
 };
 
@@ -130,18 +156,26 @@ clear_button.addEventListener('click', function(e)
 
 
 //function to create task object
-var createTaskObject = function (title_value, description_value)
+function createTaskObject()
 {
+    let title_input = document.getElementById('title');
+    let desc_input = document.getElementById('description');
+    
     taskObject =
     {
-        Title : title_value.value,
-        Description: description_value.value,
+        Title : title_input.value,
+        Description: desc_input.value,
     }
     return taskObject;
-};
+}
 
 
-var addTaskDiv = function (value)
+function back()
+{
+    document.location.reload();
+}
+
+function createTaskDiv(value)
 {
     //create div element and assign className
     var task_containner = document.createElement('div');
@@ -154,20 +188,24 @@ var addTaskDiv = function (value)
     todo._id = 'task-'+ value._id;
 
     //Add info to task display
-    todo.innerHTML = '<strong>Title</strong>: ' + value.Title + '<br> <strong>Description</strong>: ' + value.Description + '<br> <strong>Status</strong>: ' + value.Status + '<br> <strong>Date Created</strong>: ' + value.DateCreated + '<br> <strong>Date Completed</strong>: ' + value.DateCompleted; 
+    todo.innerHTML = `  <strong>Title</strong>: ${value.Title}<br>
+                        <strong>Description</strong>: ${value.Description}<br> 
+                        <strong>Status</strong>:  ${value.Status} <br>
+                        <strong>Date Created</strong>: ${value.DateCreated }<br>
+                        <strong>Date Completed</strong>: ${(value.Status === 'To Do')? "Pending": value.DateCompleted}`; 
      
     task_containner.appendChild(todo);
     
      //Add edit button
-      addEditButton(value, task_containner);
+     createEditButton(value, task_containner);
 
       //Add delete button
-      addDeleteButton(value, task_containner);    
+      createDeleteButton(value, task_containner);    
     
      todoList.appendChild(task_containner);
 };
 
-var addEditButton = function(value,task_containner)
+function createEditButton(value,task_containner)
 {
     //creation of edit option
     var edit_task = document.createElement('button');
@@ -179,7 +217,7 @@ var addEditButton = function(value,task_containner)
 
 };
 
-var addDeleteButton = function(value, task_containner)
+function createDeleteButton(value, task_containner)
 {
     //creation of delete option
     var delete_task = document.createElement('button');
@@ -190,24 +228,22 @@ var addDeleteButton = function(value, task_containner)
     task_containner.appendChild(delete_task);
 };
 
-var makeEditForm =function(values){
-   let edit_form = document.createElement('form'); 
+function createEditForm(values){
+    let edit_form = document.createElement('form');
     edit_form.id = "edit_form";
+    edit_form.setAttribute("name", values._id);
     edit_form.innerHTML =  `<h4> Edit Task</h4>
     <small>Title should not be less than 5 letters.</small>
     <input type="text" id="title" value=${values.Title} required><br><br>
     <small>Description should not be less than 10 characters.</small><br>
     <textarea type="text" id='description' required>${values.Description}</textarea><br>
     <p>Status</p>
-    <input type="radio" name="status" value="To Do" checked>To Do<br>
-    <input type="radio" name="Status" value="Completed">Completed<br>
+    ${(values.Status === 'To Do')?"<input type='radio' name='status' value='To Do' checked>To Do":"<input type='radio' name='status' value='To Do'>To Do" } <br>
+    ${(values.Status === 'Completed')?"<input type='radio' name='status' value='Completed' checked>Completed":"<input type='radio' name='status' value='Completed'>Completed" } <br>
     <p>Date Created: ${values.DateCreated}</p>
-    <p>Date Completed: ${values.DateCompleted}</p><br>
-    <input type="submit" id="edit_button" value="Edit"><br>` ;
+    ${(values.Status === 'To Do')? "Date Completed: Pending":"Date Completed: "+ values.DateCompleted }<br><br>
+    <input type="submit" id="edit_button" value="Edit">
+    <button id="edit_button" onclick="back()">Back</button><br>` ;
         
-    let form = document.getElementById('form');
-    let task_form = document.getElementById('form_task');
-    
-    form.replaceChild(edit_form, form_task);    
-
+    formDiv.replaceChild(edit_form, add_form);    
 }

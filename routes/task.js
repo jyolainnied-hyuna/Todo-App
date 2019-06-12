@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const express = require('express');
-const uniqid = require('uniqid');
+const boom = require('express-boom');
+
 const router = express.Router();
+router.use(boom());
 
 //define a schema for tasks
 const taskSchema = new mongoose.Schema({
@@ -24,11 +26,10 @@ const taskSchema = new mongoose.Schema({
     },
     DateCreated: {
         type: Date, 
-        default: Date.now
+        default: Date()
     },
     DateCompleted: {
-        type: Date,
-        default: Date.now
+        type: Date
     }
 });
 
@@ -48,7 +49,7 @@ router.post('/add', async(req, res) =>
 {
     //validating input
     const result = validateTask (req.body);  
-    if(result.error) return res.status(400).send(result.error.details[0].message);          //Bad Request
+    if(result.error) return res.boom.badRequest(result.error.details[0].message);          // 400: Bad Request
     
     //create document
     let task = new Task({
@@ -67,7 +68,8 @@ router.get('/getTask/:ID', async(req, res) =>
 {  
     //checks if task exists and updates it
     const task = await Task.findById(req.params.ID);
-    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
+    if(!task) return res.boom.notFound("This task doesn't exist");   //404: Object not found
+
     //send task item 
     res.send(task);
 });
@@ -78,14 +80,16 @@ router.put('/edit/:ID', async(req, res) =>
 {  
     //validating input
     const result = validateTask(req.body);  
-    if(result.error) return res.status(400).send(result.error.details[0].message);          //Bad Request
+    if(result.error) return res.boom.badRequest(result.error.details[0].message);          // 400: Bad Request
 
     //checks if task exists and updates it
     const task = await Task.findByIdAndUpdate(req.params.ID,
         {   Title: req.body.Title,
-            Description: req.body.Description
+            Description: req.body.Description,
+            Status: req.body.Status,
+            DateCompleted: req.body.DateCompleted
         }, {new: true});
-    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
+    if(!task) return res.boom.notFound("This task doesn't exist");   //404: Object not found
 
     //send task item 
     res.send(task);
@@ -94,10 +98,9 @@ router.put('/edit/:ID', async(req, res) =>
 //response to delete a task request
 router.delete('/delete/:ID', async(req, res) =>
 {  
-    console.log('here');
     //checks is task exists and deletes it
     const task = await Task.findByIdAndDelete(req.params.ID);
-    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
+    if(!task) return res.boom.notFound("This task doesn't exist");   //404: Object not found
     
     res.send(task);
 });
@@ -107,18 +110,21 @@ router.delete('/delete/:ID', async(req, res) =>
 router.delete('/deleteAll', async(req, res) =>
 {
     //checks is task exists and deletes it
-    const task = await Task.deleteMany({ Status: 'To Do' }, { Status: 'Completed' });
-    if(!task) return res.status(404).send("This task doesn't exist");   //404: Object not found
+    const task = await Task.deleteMany({DateCreated: {$gt : 0}});
+    if(!task) return res.boom.notFound("This task doesn't exist");   //404: Object not found
 
     res.send('Task(s) will be deleted!');
 });
+
 
 //used to validate requests
 function validateTask (body){
     //validating input
     const schema = {
     Title: Joi.string().min(5).max(50).required(),       
-    Description: Joi.string().min(10).max(225).required()
+    Description: Joi.string().min(10).max(225).required(),
+    Status: Joi.string(),
+    DateCompleted: Joi.date()
     }
     return Joi.validate(body, schema);
 }
