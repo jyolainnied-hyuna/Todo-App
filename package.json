@@ -15,7 +15,7 @@
     "express-boom": "^3.0.0",
     "joi": "^14.3.1",
     "mongodb": "^3.2.7",
-    "mongoose": "^5.5.13",
+    "mongoose": "^5.7.5",
     "path": "^0.12.7",
     "pug": "^2.0.3",
     "uniqid": "^5.0.3"
